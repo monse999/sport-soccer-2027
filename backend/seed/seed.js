@@ -9,42 +9,55 @@ import StarPlayer from "./models/StarPlayer.js";
 
 dotenv.config();
 
+
+// =====================================================
+// EQUIPOS
+// =====================================================
+
 const teamsData = [
+  // GRUPO A
   { teamId: "qat", name: "Qatar", iso: "qa", group: "A", pj: 3, dg: -4, pts: 3 },
   { teamId: "ecu", name: "Ecuador", iso: "ec", group: "A", pj: 3, dg: 2, pts: 6 },
   { teamId: "sen", name: "Senegal", iso: "sn", group: "A", pj: 3, dg: 0, pts: 4 },
   { teamId: "ned", name: "Netherlands", iso: "nl", group: "A", pj: 3, dg: 3, pts: 7 },
 
+  // GRUPO B
   { teamId: "eng", name: "England", iso: "gb-eng", group: "B", pj: 3, dg: 3, pts: 7 },
   { teamId: "irn", name: "Iran", iso: "ir", group: "B", pj: 3, dg: 2, pts: 6 },
   { teamId: "usa", name: "USA", iso: "us", group: "B", pj: 3, dg: -1, pts: 3 },
   { teamId: "wal", name: "Wales", iso: "gb-wls", group: "B", pj: 3, dg: -4, pts: 1 },
 
+  // GRUPO C
   { teamId: "arg", name: "Argentina", iso: "ar", group: "C", pj: 3, dg: 4, pts: 9 },
   { teamId: "ksa", name: "Saudi Arabia", iso: "sa", group: "C", pj: 3, dg: -1, pts: 4 },
   { teamId: "mex", name: "Mexico", iso: "mx", group: "C", pj: 3, dg: 0, pts: 4 },
   { teamId: "pol", name: "Poland", iso: "pl", group: "C", pj: 3, dg: -3, pts: 2 },
 
+  // GRUPO D
   { teamId: "fra", name: "France", iso: "fr", group: "D", pj: 3, dg: 4, pts: 9 },
   { teamId: "aus", name: "Australia", iso: "au", group: "D", pj: 3, dg: 0, pts: 4 },
   { teamId: "den", name: "Denmark", iso: "dk", group: "D", pj: 3, dg: -1, pts: 3 },
   { teamId: "tun", name: "Tunisia", iso: "tn", group: "D", pj: 3, dg: -3, pts: 2 },
 
+  // GRUPO E
   { teamId: "esp", name: "Spain", iso: "es", group: "E", pj: 3, dg: 5, pts: 7 },
   { teamId: "crc", name: "Costa Rica", iso: "cr", group: "E", pj: 3, dg: -3, pts: 3 },
   { teamId: "ger", name: "Germany", iso: "de", group: "E", pj: 3, dg: 1, pts: 4 },
   { teamId: "jpn", name: "Japan", iso: "jp", group: "E", pj: 3, dg: -3, pts: 3 },
 
+  // GRUPO F
   { teamId: "bel", name: "Belgium", iso: "be", group: "F", pj: 3, dg: 2, pts: 6 },
   { teamId: "can", name: "Canada", iso: "ca", group: "F", pj: 3, dg: -2, pts: 3 },
   { teamId: "mar", name: "Morocco", iso: "ma", group: "F", pj: 3, dg: 3, pts: 7 },
   { teamId: "cro", name: "Croatia", iso: "hr", group: "F", pj: 3, dg: -3, pts: 1 },
 
+  // GRUPO G
   { teamId: "bra", name: "Brazil", iso: "br", group: "G", pj: 3, dg: 5, pts: 9 },
   { teamId: "srb", name: "Serbia", iso: "rs", group: "G", pj: 3, dg: -2, pts: 3 },
   { teamId: "sui", name: "Switzerland", iso: "ch", group: "G", pj: 3, dg: 1, pts: 5 },
   { teamId: "cmr", name: "Cameroon", iso: "cm", group: "G", pj: 3, dg: -4, pts: 1 },
 
+  // GRUPO H
   { teamId: "por", name: "Portugal", iso: "pt", group: "H", pj: 3, dg: 4, pts: 7 },
   { teamId: "gha", name: "Ghana", iso: "gh", group: "H", pj: 3, dg: -1, pts: 4 },
   { teamId: "uru", name: "Uruguay", iso: "uy", group: "H", pj: 3, dg: 2, pts: 5 },
@@ -52,8 +65,10 @@ const teamsData = [
 ];
 
 
-// Estas son las noticias que ya tienes actualmente en tu frontend.
-// Se conservan sin borrar las que ya existan en MongoDB.
+// =====================================================
+// NOTICIAS
+// =====================================================
+
 const newsData = [
   {
     title: "¡Histórico! Argentina avanza a la siguiente ronda tras un dramático empate.",
@@ -64,6 +79,7 @@ const newsData = [
     isExternal: false,
     publishedAt: new Date(Date.now() - 2 * 3600000),
   },
+
   {
     title: "Mbappé rompe récord de goleo en fase de grupos con un Hat-Trick.",
     summary: "Una actuación histórica del delantero francés.",
@@ -73,6 +89,7 @@ const newsData = [
     isExternal: false,
     publishedAt: new Date(Date.now() - 5 * 3600000),
   },
+
   {
     title: "Estadios listos: así lucen las sedes rumbo a los octavos de final.",
     summary: "Un repaso visual a las sedes del torneo.",
@@ -85,6 +102,10 @@ const newsData = [
   },
 ];
 
+
+// =====================================================
+// FUNCIÓN PRINCIPAL
+// =====================================================
 
 async function seed() {
   const uri = process.env.MONGO_URI;
@@ -99,7 +120,7 @@ async function seed() {
 
     console.log("✅ Conectado a MongoDB Atlas");
     console.log("🔄 Revisando datos existentes...");
-    
+
 
     // =====================================================
     // EQUIPOS
@@ -109,7 +130,9 @@ async function seed() {
     let teamsSkipped = 0;
 
     for (const team of teamsData) {
-      const exists = await Team.findOne({ teamId: team.teamId });
+      const exists = await Team.findOne({
+        teamId: team.teamId,
+      });
 
       if (exists) {
         teamsSkipped++;
@@ -154,7 +177,6 @@ async function seed() {
 
     // =====================================================
     // SPONSORS
-    // Solo se agregan si todavía no existen.
     // =====================================================
 
     const sponsorsCount = await Sponsor.countDocuments();
@@ -166,16 +188,19 @@ async function seed() {
           tier: "official",
           logo: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Coca-Cola_logo.svg",
         },
+
         {
           name: "Nike",
           tier: "official",
           logo: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg",
         },
+
         {
           name: "Adidas",
           tier: "gold",
           logo: "https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg",
         },
+
         {
           name: "Visa",
           tier: "gold",
@@ -184,6 +209,7 @@ async function seed() {
       ];
 
       await Sponsor.insertMany(sponsorsData);
+
       console.log("🤝 Sponsors iniciales agregados.");
     } else {
       console.log("🤝 Sponsors existentes conservados.");
@@ -191,8 +217,7 @@ async function seed() {
 
 
     // =====================================================
-    // JUGADORES
-    // Solo se agregan si todavía no existen.
+    // JUGADORES DESTACADOS
     // =====================================================
 
     const playersCount = await StarPlayer.countDocuments();
@@ -202,26 +227,41 @@ async function seed() {
         {
           name: "L. Messi",
           team: "Argentina",
+          country: "Argentina",
+          iso: "ar",
         },
+
         {
           name: "K. Mbappé",
           team: "France",
+          country: "France",
+          iso: "fr",
         },
+
         {
           name: "Neymar Jr",
           team: "Brazil",
+          country: "Brazil",
+          iso: "br",
         },
+
         {
           name: "H. Kane",
           team: "England",
+          country: "England",
+          iso: "gb",
         },
+
         {
           name: "C. Gakpo",
           team: "Netherlands",
+          country: "Netherlands",
+          iso: "nl",
         },
       ];
 
       await StarPlayer.insertMany(starPlayersData);
+
       console.log("⭐ Jugadores iniciales agregados.");
     } else {
       console.log("⭐ Jugadores existentes conservados.");
@@ -230,7 +270,6 @@ async function seed() {
 
     // =====================================================
     // PARTIDOS
-    // Solo se agregan si la colección está vacía.
     // =====================================================
 
     const matchesCount = await Match.countDocuments();
@@ -252,6 +291,7 @@ async function seed() {
           status: "live",
           time: "13:00",
         },
+
         {
           id: "g2",
           stadium: {
@@ -267,6 +307,7 @@ async function seed() {
           status: "live",
           time: "16:00",
         },
+
         {
           id: "g3",
           stadium: {
@@ -282,6 +323,7 @@ async function seed() {
           status: "live",
           time: "19:00",
         },
+
         {
           id: "g4",
           stadium: {
@@ -300,6 +342,7 @@ async function seed() {
       ];
 
       await Match.insertMany(matchesData);
+
       console.log("⚽ Partidos iniciales agregados.");
     } else {
       console.log("⚽ Partidos existentes conservados.");
@@ -307,7 +350,7 @@ async function seed() {
 
 
     // =====================================================
-    // TERMINAR
+    // FINALIZAR
     // =====================================================
 
     console.log("");
@@ -318,6 +361,7 @@ async function seed() {
     console.log("🔒 Los equipos existentes fueron conservados.");
     console.log("🔒 Las noticias existentes fueron conservadas.");
     console.log("======================================");
+
 
     await mongoose.disconnect();
     process.exit(0);
@@ -330,5 +374,10 @@ async function seed() {
     process.exit(1);
   }
 }
+
+
+// =====================================================
+// EJECUTAR
+// =====================================================
 
 seed();
