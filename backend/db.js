@@ -1,11 +1,15 @@
 import mongoose from "mongoose";
 
 export async function connectDB() {
-  const uri = process.env.MONGODB_URI;
+  const uri = process.env.MONGO_URI;
+
   if (!uri) {
-    console.warn("⚠️  No se definió MONGODB_URI en el .env. El backend no podrá conectarse a MongoDB.");
+    console.warn(
+      "⚠️ No se definió MONGO_URI en las variables de entorno. El backend no podrá conectarse a MongoDB."
+    );
     return;
   }
+
   try {
     await mongoose.connect(uri);
     console.log("✅ Conectado a MongoDB Atlas");
