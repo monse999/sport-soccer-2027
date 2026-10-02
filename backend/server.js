@@ -1,6 +1,3 @@
-import adminRoutes from "./routes/admin.js";
-app.use("/api/admin", adminRoutes);
-
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -12,6 +9,7 @@ import matchesRoutes from "./routes/matches.js";
 import sponsorsRoutes from "./routes/sponsors.js";
 import starPlayersRoutes from "./routes/starPlayers.js";
 import betsRoutes from "./routes/bets.js";
+import adminRoutes from "./routes/admin.js";
 
 dotenv.config();
 
@@ -25,11 +23,12 @@ app.use("/api/matches", matchesRoutes);
 app.use("/api/sponsors", sponsorsRoutes);
 app.use("/api/star-players", starPlayersRoutes);
 app.use("/api/bets", betsRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 4000;
 
 connectDB().then(() => {
- app.listen(PORT, "0.0.0.0", () => console.log(`🚀 API de Sport Soccer 2027 corriendo en puerto ${PORT}`));
+  app.listen(PORT, () => console.log(`🚀 API de Sport Soccer 2027 corriendo en puerto ${PORT}`));
 });
