@@ -1,5 +1,6 @@
-{
+
+{ 
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://sport-soccer-2027-api.onrender.com/api/:path*" }
-  ]
+    { "source": "/api/:path*", "destination": "https://sport-soccer-2027.onrender.com/api/:path*" }
+  ] 
 }
