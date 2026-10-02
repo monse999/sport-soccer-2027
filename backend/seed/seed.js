@@ -71,7 +71,8 @@ const teamsData = [
 
 const newsData = [
   {
-    title: "¡Histórico! Argentina avanza a la siguiente ronda tras un dramático empate.",
+    title:
+      "¡Histórico! Argentina avanza a la siguiente ronda tras un dramático empate.",
     summary: "Resumen del partido y reacciones.",
     body: "Resumen del partido y reacciones.",
     image: "",
@@ -81,7 +82,8 @@ const newsData = [
   },
 
   {
-    title: "Mbappé rompe récord de goleo en fase de grupos con un Hat-Trick.",
+    title:
+      "Mbappé rompe récord de goleo en fase de grupos con un Hat-Trick.",
     summary: "Una actuación histórica del delantero francés.",
     body: "Una actuación histórica del delantero francés.",
     image: "",
@@ -91,7 +93,8 @@ const newsData = [
   },
 
   {
-    title: "Estadios listos: así lucen las sedes rumbo a los octavos de final.",
+    title:
+      "Estadios listos: así lucen las sedes rumbo a los octavos de final.",
     summary: "Un repaso visual a las sedes del torneo.",
     body: "Un repaso visual a las sedes del torneo.",
     image:
@@ -104,6 +107,159 @@ const newsData = [
 
 
 // =====================================================
+// SPONSORS
+// =====================================================
+
+const sponsorsData = [
+  {
+    name: "Coca-Cola",
+    tier: "official",
+    logo:
+      "https://upload.wikimedia.org/wikipedia/commons/c/ce/Coca-Cola_logo.svg",
+  },
+
+  {
+    name: "Nike",
+    tier: "official",
+    logo:
+      "https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg",
+  },
+
+  {
+    name: "Adidas",
+    tier: "gold",
+    logo:
+      "https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg",
+  },
+
+  {
+    name: "Visa",
+    tier: "gold",
+    logo:
+      "https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg",
+  },
+];
+
+
+// =====================================================
+// JUGADORES DESTACADOS
+// =====================================================
+
+const starPlayersData = [
+  {
+    name: "L. Messi",
+    country: "Argentina",
+    iso: "ar",
+    goals: 0,
+    rating: 0,
+  },
+
+  {
+    name: "K. Mbappé",
+    country: "France",
+    iso: "fr",
+    goals: 0,
+    rating: 0,
+  },
+
+  {
+    name: "Neymar Jr",
+    country: "Brazil",
+    iso: "br",
+    goals: 0,
+    rating: 0,
+  },
+
+  {
+    name: "H. Kane",
+    country: "England",
+    iso: "gb",
+    goals: 0,
+    rating: 0,
+  },
+
+  {
+    name: "C. Gakpo",
+    country: "Netherlands",
+    iso: "nl",
+    goals: 0,
+    rating: 0,
+  },
+];
+
+
+// =====================================================
+// PARTIDOS
+// =====================================================
+
+const matchesData = [
+  {
+    id: "g1",
+    stadium: {
+      id: "st1",
+      name: "Lusail Stadium",
+      city: "Lusail, Qatar",
+    },
+    teamA: "qat",
+    teamB: "ecu",
+    scoreA: 2,
+    scoreB: 1,
+    minute: 65,
+    status: "live",
+    time: "13:00",
+  },
+
+  {
+    id: "g2",
+    stadium: {
+      id: "st2",
+      name: "Al Bayt Stadium",
+      city: "Al Khor, Qatar",
+    },
+    teamA: "arg",
+    teamB: "mex",
+    scoreA: 0,
+    scoreB: 0,
+    minute: 65,
+    status: "live",
+    time: "16:00",
+  },
+
+  {
+    id: "g3",
+    stadium: {
+      id: "st3",
+      name: "Khalifa International",
+      city: "Doha, Qatar",
+    },
+    teamA: "fra",
+    teamB: "tun",
+    scoreA: 3,
+    scoreB: 1,
+    minute: 65,
+    status: "live",
+    time: "19:00",
+  },
+
+  {
+    id: "g4",
+    stadium: {
+      id: "st4",
+      name: "Education City",
+      city: "Al Rayyan, Qatar",
+    },
+    teamA: "bra",
+    teamB: "sui",
+    scoreA: 1,
+    scoreB: 2,
+    minute: 65,
+    status: "live",
+    time: "22:00",
+  },
+];
+
+
+// =====================================================
 // FUNCIÓN PRINCIPAL
 // =====================================================
 
@@ -111,15 +267,23 @@ async function seed() {
   const uri = process.env.MONGO_URI;
 
   if (!uri) {
-    console.error("❌ No existe MONGO_URI en las variables de entorno.");
+    console.error(
+      "❌ No existe MONGO_URI en las variables de entorno."
+    );
+
     process.exit(1);
   }
 
   try {
+    // =====================================================
+    // CONEXIÓN
+    // =====================================================
+
     await mongoose.connect(uri);
 
     console.log("✅ Conectado a MongoDB Atlas");
     console.log("🔄 Revisando datos existentes...");
+    console.log("");
 
 
     // =====================================================
@@ -146,6 +310,7 @@ async function seed() {
     console.log(
       `⚽ Equipos: ${teamsInserted} agregados, ${teamsSkipped} ya existían.`
     );
+    console.log("");
 
 
     // =====================================================
@@ -173,6 +338,7 @@ async function seed() {
     console.log(
       `📰 Noticias: ${newsInserted} agregadas, ${newsSkipped} ya existían.`
     );
+    console.log("");
 
 
     // =====================================================
@@ -182,38 +348,14 @@ async function seed() {
     const sponsorsCount = await Sponsor.countDocuments();
 
     if (sponsorsCount === 0) {
-      const sponsorsData = [
-        {
-          name: "Coca-Cola",
-          tier: "official",
-          logo: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Coca-Cola_logo.svg",
-        },
-
-        {
-          name: "Nike",
-          tier: "official",
-          logo: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg",
-        },
-
-        {
-          name: "Adidas",
-          tier: "gold",
-          logo: "https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg",
-        },
-
-        {
-          name: "Visa",
-          tier: "gold",
-          logo: "https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg",
-        },
-      ];
-
       await Sponsor.insertMany(sponsorsData);
 
       console.log("🤝 Sponsors iniciales agregados.");
     } else {
       console.log("🤝 Sponsors existentes conservados.");
     }
+
+    console.log("");
 
 
     // =====================================================
@@ -223,49 +365,32 @@ async function seed() {
     const playersCount = await StarPlayer.countDocuments();
 
     if (playersCount === 0) {
-      const starPlayersData = [
-        {
-          name: "L. Messi",
-          team: "Argentina",
-          country: "Argentina",
-          iso: "ar",
-        },
 
-        {
-          name: "K. Mbappé",
-          team: "France",
-          country: "France",
-          iso: "fr",
-        },
+      console.log("⭐ Agregando jugadores destacados...");
 
-        {
-          name: "Neymar Jr",
-          team: "Brazil",
-          country: "Brazil",
-          iso: "br",
-        },
+      for (const player of starPlayersData) {
 
-        {
-          name: "H. Kane",
-          team: "England",
-          country: "England",
-          iso: "gb",
-        },
+        await StarPlayer.create({
+          name: player.name,
+          country: player.country,
+          iso: player.iso,
+          goals: player.goals,
+          rating: player.rating,
+        });
 
-        {
-          name: "C. Gakpo",
-          team: "Netherlands",
-          country: "Netherlands",
-          iso: "nl",
-        },
-      ];
-
-      await StarPlayer.insertMany(starPlayersData);
+      }
 
       console.log("⭐ Jugadores iniciales agregados.");
+
     } else {
-      console.log("⭐ Jugadores existentes conservados.");
+
+      console.log(
+        `⭐ Jugadores existentes conservados (${playersCount}).`
+      );
+
     }
+
+    console.log("");
 
 
     // =====================================================
@@ -275,102 +400,56 @@ async function seed() {
     const matchesCount = await Match.countDocuments();
 
     if (matchesCount === 0) {
-      const matchesData = [
-        {
-          id: "g1",
-          stadium: {
-            id: "st1",
-            name: "Lusail Stadium",
-            city: "Lusail, Qatar",
-          },
-          teamA: "qat",
-          teamB: "ecu",
-          scoreA: 2,
-          scoreB: 1,
-          minute: 65,
-          status: "live",
-          time: "13:00",
-        },
-
-        {
-          id: "g2",
-          stadium: {
-            id: "st2",
-            name: "Al Bayt Stadium",
-            city: "Al Khor, Qatar",
-          },
-          teamA: "arg",
-          teamB: "mex",
-          scoreA: 0,
-          scoreB: 0,
-          minute: 65,
-          status: "live",
-          time: "16:00",
-        },
-
-        {
-          id: "g3",
-          stadium: {
-            id: "st3",
-            name: "Khalifa International",
-            city: "Doha, Qatar",
-          },
-          teamA: "fra",
-          teamB: "tun",
-          scoreA: 3,
-          scoreB: 1,
-          minute: 65,
-          status: "live",
-          time: "19:00",
-        },
-
-        {
-          id: "g4",
-          stadium: {
-            id: "st4",
-            name: "Education City",
-            city: "Al Rayyan, Qatar",
-          },
-          teamA: "bra",
-          teamB: "sui",
-          scoreA: 1,
-          scoreB: 2,
-          minute: 65,
-          status: "live",
-          time: "22:00",
-        },
-      ];
 
       await Match.insertMany(matchesData);
 
       console.log("⚽ Partidos iniciales agregados.");
+
     } else {
-      console.log("⚽ Partidos existentes conservados.");
+
+      console.log(
+        `⚽ Partidos existentes conservados (${matchesCount}).`
+      );
+
     }
+
+    console.log("");
 
 
     // =====================================================
     // FINALIZAR
     // =====================================================
 
-    console.log("");
     console.log("======================================");
     console.log("✅ SEED TERMINADO CORRECTAMENTE");
     console.log("======================================");
     console.log("🔒 No se eliminó ningún dato existente.");
     console.log("🔒 Los equipos existentes fueron conservados.");
     console.log("🔒 Las noticias existentes fueron conservadas.");
+    console.log("🔒 Los sponsors existentes fueron conservados.");
+    console.log("🔒 Los jugadores existentes fueron conservados.");
+    console.log("🔒 Los partidos existentes fueron conservados.");
     console.log("======================================");
 
 
     await mongoose.disconnect();
+
     process.exit(0);
 
   } catch (error) {
-    console.error("❌ Error durante el seed:");
-    console.error(error);
 
-    await mongoose.disconnect();
+    console.error("");
+    console.error("❌ ERROR DURANTE EL SEED");
+    console.error("======================================");
+    console.error(error);
+    console.error("======================================");
+
+    try {
+      await mongoose.disconnect();
+    } catch (disconnectError) {
+      console.error("No se pudo cerrar la conexión:", disconnectError);
+    }
+
     process.exit(1);
   }
 }
