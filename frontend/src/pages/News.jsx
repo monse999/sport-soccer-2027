@@ -31,11 +31,53 @@ function NewsModal({ item, onClose }) {
   );
 }
 
+function NewsForm({ initial, onCancel, onSaved }) {
+  const { t } = useLanguage();
+  const { adminHeaders } = useAdmin();
+  const [form, setForm] = useState(initial || { title: "", summary: "", body: "", image: "" });
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    const method = form._id ? "PUT" : "POST";
+    const url = form._id ? `/api/news/${form._id}` : "/api/news";
+    await fetch(url, { method, headers: adminHeaders(), body: JSON.stringify(form) });
+    setSaving(false);
+    onSaved();
+  };
+
+  return (
+    <div className="admin-form-card">
+      <div className="form-group">
+        <label>{t("admin_news_title_label")}</label>
+        <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
+      </div>
+      <div className="form-group">
+        <label>{t("admin_news_summary_label")}</label>
+        <input value={form.summary} onChange={(e) => setForm({ ...form, summary: e.target.value })} />
+      </div>
+      <div className="form-group">
+        <label>{t("admin_news_body_label")}</label>
+        <textarea rows={5} value={form.body} onChange={(e) => setForm({ ...form, body: e.target.value })} />
+      </div>
+      <div className="form-group">
+        <label>{t("admin_news_image_label")}</label>
+        <input value={form.image || ""} onChange={(e) => setForm({ ...form, image: e.target.value })} />
+      </div>
+      <div className="admin-form-actions">
+        <button className="btn-add" onClick={save} disabled={saving || !form.title}>{saving ? "..." : t("admin_save")}</button>
+        <button className="btn-ghost" onClick={onCancel}>{t("admin_cancel")}</button>
+      </div>
+    </div>
+  );
+}
+
 export default function News() {
   const { t } = useLanguage();
   const { isAdmin, adminHeaders } = useAdmin();
   const [news, setNews] = useState([]);
   const [selected, setSelected] = useState(null);
+  const [editing, setEditing] = useState(null);
 
   const load = () => {
     fetch("/api/news")
@@ -53,9 +95,28 @@ export default function News() {
     load();
   };
 
+  const onEdit = (e, item) => {
+    e.stopPropagation();
+    setEditing(item);
+  };
+
   return (
     <section className="section" style={{ marginTop: 24 }}>
-      <h2 className="section-title">📰 {t("news_title")}</h2>
+      <div className="admin-topbar">
+        <h2 className="section-title" style={{ marginBottom: 0 }}>📰 {t("news_title")}</h2>
+        {isAdmin && (
+          <button className="btn-add" onClick={() => setEditing({})}>+ {t("admin_new_news_title")}</button>
+        )}
+      </div>
+
+      {isAdmin && editing && (
+        <NewsForm
+          initial={editing._id ? editing : null}
+          onCancel={() => setEditing(null)}
+          onSaved={() => { setEditing(null); load(); }}
+        />
+      )}
+
       <div className="news-grid">
         {news.map((n) => (
           <button key={n._id || n.id} className="news-card" onClick={() => setSelected(n)}>
@@ -68,6 +129,9 @@ export default function News() {
               <div className="news-headline">{n.title}</div>
               {isAdmin && n._id && (
                 <div className="news-admin-actions">
+                  {!n.isExternal && (
+                    <button className="btn-small btn-edit" onClick={(e) => onEdit(e, n)}>✏️ {t("admin_edit")}</button>
+                  )}
                   <button className="btn-small btn-delete" onClick={(e) => onDelete(e, n._id)}>🗑 {t("admin_delete")}</button>
                 </div>
               )}
