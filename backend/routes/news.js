@@ -1,81 +1,72 @@
-import { useState, useEffect } from "react";
-import { useLanguage } from "../context/LanguageContext";
-import { useAdmin } from "../context/AdminContext";
-import { newsItems as fallbackNews } from "../data/news";
+import { Router } from "express";
+import Parser from "rss-parser";
+import News from "../models/News.js";
+import { requireAdmin } from "./admin.js";
 
-function timeAgoLabel(publishedAt, t) {
-  const hours = Math.max(1, Math.round((Date.now() - new Date(publishedAt).getTime()) / 3600000));
-  return hours >= 24 ? t("day_ago", { n: Math.round(hours / 24) }) : t("hours_ago", { n: hours });
-}
+const router = Router();
+const parser = new Parser();
 
-function NewsModal({ item, onClose }) {
-  const { t } = useLanguage();
-  if (!item) return null;
-  return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-        <div style={{ position: "relative" }}>
-          {item.image && <div className="modal-image" style={{ backgroundImage: `url(${item.image})` }} />}
-          <button className="modal-close" onClick={onClose}>✕</button>
-        </div>
-        <div className="modal-body">
-          <div className="modal-title">{item.title}</div>
-          <div className="modal-meta">{t("source_label")}: {item.source} · {timeAgoLabel(item.publishedAt, t)}</div>
-          <div className="modal-text">{item.isExternal ? item.summary : (item.body || item.summary)}</div>
-          {item.isExternal && item.link && (
-            <a className="modal-link-btn" href={item.link} target="_blank" rel="noopener noreferrer">📰 {t("read_more")}</a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+const FEEDS = [
+  { url: "http://feeds.bbci.co.uk/sport/football/rss.xml", source: "BBC Sport" },
+  { url: "https://www.espn.com/espn/rss/soccer/news", source: "ESPN" },
+];
 
-export default function News() {
-  const { t } = useLanguage();
-  const { isAdmin, adminHeaders } = useAdmin();
-  const [news, setNews] = useState([]);
-  const [selected, setSelected] = useState(null);
+router.get("/", async (req, res) => {
+  const news = await News.find().sort({ publishedAt: -1 });
+  res.json(news);
+});
 
-  const load = () => {
-    fetch("/api/news")
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((data) => setNews(data.length ? data : fallbackNews))
-      .catch(() => setNews(fallbackNews));
-  };
+router.get("/:id", async (req, res) => {
+  const item = await News.findById(req.params.id);
+  if (!item) return res.status(404).json({ error: "not_found" });
+  res.json(item);
+});
 
-  useEffect(() => { load(); }, []);
+router.post("/refresh-live", async (req, res) => {
+  let totalNuevas = 0;
+  try {
+    for (const feed of FEEDS) {
+      const parsed = await parser.parseURL(feed.url);
+      const items = parsed.items.slice(0, 8);
+      for (const item of items) {
+        const exists = await News.findOne({ link: item.link });
+        if (exists) continue;
+        await News.create({
+          title: item.title,
+          summary: (item.contentSnippet || item.summary || "").slice(0, 280),
+          image: item.enclosure?.url || null,
+          link: item.link,
+          source: feed.source,
+          isExternal: true,
+          publishedAt: item.isoDate ? new Date(item.isoDate) : new Date(),
+        });
+        totalNuevas++;
+      }
+    }
+    res.json({ ok: true, nuevas: totalNuevas });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: "No se pudo conectar a los feeds de noticias", detail: err.message });
+  }
+});
 
-  const onDelete = async (e, id) => {
-    e.stopPropagation();
-    if (!confirm(t("admin_confirm_delete"))) return;
-    await fetch(`/api/news/${id}`, { method: "DELETE", headers: adminHeaders() });
-    load();
-  };
+router.post("/", requireAdmin, async (req, res) => {
+  const { title, summary, body, image } = req.body;
+  if (!title) return res.status(400).json({ error: "title_required" });
+  const created = await News.create({ title, summary, body, image, source: "Sport Soccer 2027", isExternal: false, publishedAt: new Date() });
+  res.status(201).json(created);
+});
 
-  return (
-    <section className="section" style={{ marginTop: 24 }}>
-      <h2 className="section-title">📰 {t("news_title")}</h2>
-      <div className="news-grid">
-        {news.map((n) => (
-          <button key={n._id || n.id} className="news-card" onClick={() => setSelected(n)}>
-            <div className="news-image" style={{ backgroundImage: n.image ? `url(${n.image})` : undefined }} />
-            <div className="news-body">
-              <div className="news-time">
-                <span>🗓 {timeAgoLabel(n.publishedAt || Date.now(), t)}</span>
-                {n.source && <span className="news-source">{n.source}</span>}
-              </div>
-              <div className="news-headline">{n.title}</div>
-              {isAdmin && n._id && (
-                <div className="news-admin-actions">
-                  <button className="btn-small btn-delete" onClick={(e) => onDelete(e, n._id)}>🗑 {t("admin_delete")}</button>
-                </div>
-              )}
-            </div>
-          </button>
-        ))}
-      </div>
-      <NewsModal item={selected} onClose={() => setSelected(null)} />
-    </section>
-  );
-}
+router.put("/:id", requireAdmin, async (req, res) => {
+  const { title, summary, body, image } = req.body;
+  const updated = await News.findByIdAndUpdate(req.params.id, { title, summary, body, image }, { new: true });
+  if (!updated) return res.status(404).json({ error: "not_found" });
+  res.json(updated);
+});
+
+router.delete("/:id", requireAdmin, async (req, res) => {
+  const deleted = await News.findByIdAndDelete(req.params.id);
+  if (!deleted) return res.status(404).json({ error: "not_found" });
+  res.json({ ok: true });
+});
+
+export default router;
